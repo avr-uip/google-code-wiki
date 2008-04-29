@@ -4,6 +4,5 @@
 = avr-uip 0.1 =
    * New clock implementation using 8/16 bit timers configurable in header files.
    * Extract TODOs from makefile and other places.
+   * Add NTP time support
    * Write more TODOs.
-
-
