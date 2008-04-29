@@ -1,0 +1,9 @@
+#summary A roadmap/todolist for this project.
+#labels Featured,Phase-Requirements
+
+= avr-uip 0.1 =
+   * New clock implementation using 8/16 bit timers configurable in header files.
+   * Extract TODOs from makefile and other places.
+   * Write more TODOs.
+
+
