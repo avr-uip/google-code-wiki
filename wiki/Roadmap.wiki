@@ -5,6 +5,7 @@
    == New clock implementation ==
         * using 8/16 bit timers configurable in header files.
         * Rewrite delay function to utilize same timer as clock, to free hardware demand.
+        * Add macros(defines) for calculating correct clock init values so a user only needs to define clock freq.
    == Extract TODOs from makefile and other places. ==
    == Add NTP time support ==
    == Write more TODOs ==
