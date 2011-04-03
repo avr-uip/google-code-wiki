@@ -1,0 +1,15 @@
+What is TuxGraphics
+
+= Introduction =
+
+Tux Graphics boards are a great starting point for developing devices based on the atmega168/328/644 chips with a ENC28J60 ethernet chip.
+
+Online shop:
+http://shop.tuxgraphics.org/electronic/index-eth.html
+
+Home page:
+http://tuxgraphics.org/
+
+= Disclaimer =
+
+As of the date this page was created this project is not directly associated with TuxGraphics.  This project was just started by people who use there boards.
