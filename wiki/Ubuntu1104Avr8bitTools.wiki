@@ -1,57 +1,51 @@
-#summary One-sentence summary of this page.
+#How to compile a tool set for Ubuntu 11.04.
 
 = Introduction =
 
-Add your content here.
+These are almost 100% copied from the TuxGraphics site. Only the tools version have been updated to work for Ubuntu 11.04
+
+TuxGraphics HowTo: http://tuxgraphics.org/electronics/200901/avr-gcc-linux.shtml
 
 
-= Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
-
-Bin Utils 2.21.1
+= Bin Utils 2.21.1 =
 
 cd binutils-2.21.1/
 
-  120  ls
+ls
 
-  121  mkdir obj-avr
+mkdir obj-avr
 
-  122  cd obj-avr/
+cd obj-avr/
 
-  123  ../configure --target=avr --prefix=/opt/avr_8bit_tools --disable-nls --enable-install-libbfd
+../configure --target=avr --prefix=/opt/avr_8bit_tools --disable-nls --enable-install-libbfd
 
-  124  make
+make
 
-  125  make install
+make install
 
-  126  ls
+ls
 
-  127  cd ../..
+cd ../..
 
 
 
-GCC 4.3
+= GCC 4.3 =
 
-Sudo apt-get install libgmp3-dev
+sudo apt-get install libgmp3-dev
 
 
 sudo apt-get install libmpfr-dev
 
-
 tar -xjvf gcc-core-4.3.2.tar.bz2 
 
-  132  cd gcc-4.3.2/
+cd gcc-4.3.2/
 
-  133  ls
+ls
 
-  134  mkdir obj-avr
+mkdir obj-avr
 
-  135  cd obj-avr
-
+cd obj-avr
 
 ../configure --target=avr --prefix=/opt/avr_8bit_tools --disable-nls --enable-languages=c –disable-libssp
 
@@ -59,51 +53,53 @@ make
 
 make install
 
- cd ../..
+cd ../..
 
 
 
+= AVR Libc =
+
+tar -xjvf avr-libc-1.7.1.tar.bz2 
+
+cd avr-libc-1.7.1/
+
+ls
+
+export PREFIX=/opt/avr_8bit_tools/
+
+export CC=avr-gcc
+
+export PATH=/opt/avr_8bit_tools/bin:$PATH
+
+./configure --build=`./config.guess` --host=avr --prefix=/opt/avr_8bit_tools
+
+make
+
+make install
+
+cd ..
 
 
-  150  tar -xjvf avr-libc-1.7.1.tar.bz2 
+= Avrdude =
 
-  151  cd avr-libc-1.7.1/
-
-  152  ls
-
-  153  export PREFIX=/opt/avr_8bit_tools/
-
-  154  export CC=avr-gcc
-
-  155  export PATH=/opt/avr_8bit_tools/bin:$PATH
-
-  156  ./configure --build=`./config.guess` --host=avr --prefix=/opt/avr_8bit_tools
-
-  157  make
-
-  158  make install
-
-  
-
-  160  cd ..
-
-
+*required packages in order to compile*
 
 sudo apt-get install bison
 
-
 sudo apt-get install flex
- tar -xzvf avrdude-5.11.1.tar.gz 
 
-  164  cd avrdude-5.11.1/
 
-  165  export CC=gcc
+tar -xzvf avrdude-5.11.1.tar.gz 
 
-  179  ./configure --prefix=/opt/avr_8bit_tools
+cd avrdude-5.11.1/
 
-  180  make
+export CC=gcc
 
-  181  make install
+./configure --prefix=/opt/avr_8bit_tools
+
+make
+
+make install
 
 
 
