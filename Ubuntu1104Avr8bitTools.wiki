@@ -4,7 +4,7 @@
 
 These are almost 100% copied from the TuxGraphics site. Only the tools version have been updated to work for Ubuntu 11.04
 
-TuxGraphics HowTo: http://tuxgraphics.org/electronics/200901/avr-gcc-linux.shtml
+TuxGraphics How To: http://tuxgraphics.org/electronics/200901/avr-gcc-linux.shtml
 
 
 
