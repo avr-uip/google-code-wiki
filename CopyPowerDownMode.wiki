@@ -1,0 +1,103 @@
+#Page Saved regarding power down mode
+
+= Introduction =
+
+Copy of info from the following page:
+http://www.seanet.com/~karllunt/atmegapowerdown.html
+
+
+= Start Notes =
+
+ATmega devices and power-down mode
+(Last updated 31 Jan 2010)
+
+
+The firmware ritual for putting any of the ATmega devices into power-down or power-save mode isn't obvious (at least, it wasn't to me).  I've added this page describing the ritual as used in a couple of my low-power projects, in the hopes that others will benefit.
+
+
+
+A typical project
+
+My datalogger project (see here) uses power-down mode to conserve battery life.  I set up the logger on my bench with the following conditions:
+
+Bench suppy set to 3.0 VDC;
+2 GB microSD card installed;
+SparkFun boost-converter power supply BYPASSED (not in the circuit);
+UART cable NOT connected (eliminates drain from MAX232 converter);
+AVR programming pod NOT connected;
+1.0 ohm resistor in series with postive lead from bench supply.
+
+I measured the voltage across the 1.0 ohm resistor with power applied.  With the datalogger in power-down mode (indicated by the state of a debug port line on the MCU), the voltage drop was 0.6 mVDC, or 600 uA of current.
+
+I repeated the above measurement, but with the SparkFun boost-converter power supply in the circuit.  In this case, the voltage drop was 1.0 mVDC, or 1.0 mA of current.
+
+As an aside, I have built a small project that blinks a bunch of LEDs, then goes into power-down mode until a button is pressed.  That device has nothing active except the MCU.  Using the above test bed but with a 0.1 ohm resistor in the positive rail, the voltage drop across the resistor is too low for me to measure with my Fluke 75 meter.  I know the value is in the microAmps, but I don't know how low.
+
+
+
+A look at the code
+
+Here is the code from my datalogger source that makes the above power-down sequence work.  Note that I found the core of this code somewhere on the Web, but have lost track of the original page.
+
+static void  hibernate(void)
+{
+    volatile uint8_t                    mcutmp;
+
+    if (DCTimersRead(TIMER_USER) == 0)            // if the serial port is not active...
+    {
+        while ((PINB & (1<<0)) == 0) ;            // spin while PB0 is low
+        cli();                                    // quiet for just a moment
+        ShutOffADC();                             // prepare ADC for sleep
+        PRR = (1<<PRTWI) | (1<<PRTIM0) | (1<<PRTIM1) | (1<<PRTIM2) | (1<<PRSPI) | (1<<PRADC) | (1<<PRUSART0);
+        set_sleep_mode(SLEEP_MODE_PWR_DOWN);      // set the type of sleep mode to use
+        sleep_enable();                           // enable sleep mode
+        sei();                                    // allow interrupts to end sleep mode                                    
+    
+        PCICR = (1<<PCIE0) | (1<<PCIE2);          // enable interrupt on pin-change on PB0 and PD0
+    
+        PORT_DEBUG = PORT_DEBUG & ~(1<<BIT_DEBUG);    // pull debug line low
+
+        mcutmp = MCUCR | ((1<<BODS) | (1<<BODSE));
+        MCUCR = mcutmp;
+        mcutmp = mcutmp & ~(1<<BODSE);
+        MCUCR = mcutmp;
+        sleep_cpu();                              // nighty-night
+
+        sleep_disable();                          // just woke up, disable sleep mode for safety
+        PRR = PRR & ~((1<<PRTWI) | (1<<PRTIM2));  // bring up the systems we need now
+        PORT_DEBUG = PORT_DEBUG | (1<<BIT_DEBUG); // pull debug line high
+    }
+}
+
+
+
+Here is the code for shutting off the ADC, used above
+
+/*
+ *  ShutOffADC      shut down the ADC and prepare for power reduction
+ */
+void  ShutOffADC(void)
+{
+    ACSR = (1<<ACD);                        // disable A/D comparator
+    ADCSRA = (0<<ADEN);                     // disable A/D converter
+    DIDR0 = 0x3f;                           // disable all A/D inputs (ADC0-ADC5)
+    DIDR1 = 0x03;                           // disable AIN0 and AIN1
+}
+
+
+
+Additional information
+
+There are a few things worth noting in the hibernate() function above.  Per the Atmel docs on the '48P family of devices, power-down and power-save modes each conserve power, but power-down allows a very limited number of signals for subsequent wake-up.  Be sure to compare the requirements of the two low-power modes with your design and choose the appropriate sleep mode.
+
+Since my design can sleep with nothing running but the pin-change interrupt subsystem, I was able to use power-down mode and wake on an interrupt from the real-time clock (tied to PB0).  Just for kicks, I also allow wake-up on UART traffic (PD0), so the user can just press a key to wake up the logger.  Setting up the pin-change interrupts is done (in part) by the write to PCICR.  Refer to the Atmel docs for setting up the other registers associated with pin-change interrupts.
+
+The PRR register is used to shut off selected subsystems within the MCU.  Prior to entering sleep mode, I shut off unneeded subsystems by writing a 1 to each associated bit in PRR.  Note that a subsystem that has been shut off cannot be used as a source of a wake-up signal!
+
+The sequence for actually putting the MCU to sleep involves the block of five lines ending with the call to sleep_cpu().  These instructions must be executed in this order and there must be no additional instructions inserted in this block!  Following the execution of sleep_cpu(), the MCU will be put into the selected mode.  The next instruction in the sequence will NOT be executed until the MCU wakes up.
+
+
+
+Conclusion
+
+I hope the above details clarify the steps needed to develop low-power applications on the ATmega devices.  If you have any questions or comments, feel free to email me at the address on my home page.
